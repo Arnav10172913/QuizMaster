@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizMaster | Online Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ font-family:Arial,sans-serif;
+ background:#0c1020;color:#f8fafc;
+ min-height:100vh;padding:20px;
+}
+.container{max-width:750px;margin:auto}
+header{
+ display:flex;justify-content:space-between;
+ align-items:center;margin-bottom:45px;
+}
+.logo{font-size:23px;font-weight:800;color:#a5b4fc}
+.tag{font-size:12px;color:#94a3b8}
+.hero h1{font-size:38px;line-height:1.15;margin-bottom:12px}
+.hero h1 span{color:#818cf8}
+.hero p{color:#a1a1aa;line-height:1.6}
+.section-title{margin:30px 0 15px;font-size:19px}
+.categories{
+ display:grid;grid-template-columns:1fr 1fr;gap:13px
+}
+.category{
+ background:#171d33;border:1px solid #29324e;
+ padding:20px;border-radius:16px;cursor:pointer;
+ color:white;text-align:left;transition:.2s;
+}
+.category:hover{border-color:#818cf8;transform:translateY(-3px)}
+.category .emoji{font-size:28px}
+.category h3{margin:12px 0 6px;font-size:16px}
+.category p{font-size:12px;color:#9ca3af}
+button{
+ font:inherit;cursor:pointer;border:none
+}
+.primary{
+ background:linear-gradient(120deg,#6366f1,#8b5cf6);
+ color:white;padding:14px 20px;border-radius:11px;
+ font-weight:700;width:100%;margin-top:20px;
+}
+.card{
+ background:#171d33;border:1px solid #29324e;
+ padding:23px;border-radius:18px;
+}
+.hidden{display:none!important}
+.topline{display:flex;justify-content:space-between;
+ align-items:center;margin-bottom:20px}
+.small{color:#a1a1aa;font-size:13px}
+.timer{
+ background:#282b4a;color:#c4b5fd;
+ padding:9px 13px;border-radius:9px;font-weight:bold
+}
+.progress{height:7px;background:#30364d;
+ border-radius:20px;margin-bottom:25px;overflow:hidden}
+.progress div{height:100%;background:#818cf8;width:0%}
+.question{font-size:22px;line-height:1.4;margin:20px 0}
+.option{
+ display:block;width:100%;padding:15px;
+ text-align:left;background:#222a43;
+ color:white;border:1px solid #37415e;
+ border-radius:11px;margin:11px 0;
+}
+.option.selected{border-color:#818cf8;background:#30345e}
+.option.correct{border-color:#22c55e;background:#153c32}
+.option.wrong{border-color:#ef4444;background:#47252e}
+.option:disabled{cursor:default}
+.result{text-align:center;padding:15px 0}
+.score{font-size:54px;font-weight:800;color:#a5b4fc;margin:20px}
+.result p{color:#cbd5e1;line-height:1.7}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:25px}
+.stat{background:#222a43;padding:16px;border-radius:12px}
+.stat strong{font-size:23px;display:block;margin-bottom:5px}
+footer{text-align:center;color:#64748b;font-size:12px;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+ <div class="logo">✦ QuizMaster</div>
+ <div class="tag">LEARN • PLAY • GROW</div>
+</header>
+
+<section id="home">
+ <div class="hero">
+  <h1>Challenge Your <span>Mind.</span></h1>
+  <p>Test your knowledge, challenge yourself and discover how much you know.</p>
+ </div>
+
+ <h2 class="section-title">Choose Your Category</h2>
+ <div class="categories">
+  <button class="category" onclick="startQuiz('gk')">
+   <div class="emoji">🌍</div>
+   <h3>General Knowledge</h3>
+   <p>Test your awareness</p>
+  </button>
+  <button class="category" onclick="startQuiz('business')">
+   <div class="emoji">💼</div>
+   <h3>Business</h3>
+   <p>Business and commerce</p>
+  </button>
+  <button class="category" onclick="startQuiz('science')">
+   <div class="emoji">🔬</div>
+   <h3>Science</h3>
+   <p>Explore science</p>
+  </button>
+  <button class="category" onclick="startQuiz('computer')">
+   <div class="emoji">💻</div>
+   <h3>Computer</h3>
+   <p>Technology and IT</p>
+  </button>
+ </div>
+ <button class="primary" onclick="showLeaderboard()">🏆 View My Leaderboard</button>
+</section>
+
+<section id="quiz" class="hidden">
+ <div class="card">
+  <div class="topline">
+   <div>
+    <div id="categoryName">Quiz</div>
+    <div class="small" id="questionNumber"></div>
+   </div>
+   <div class="timer">⏱ <span id="time">15</span>s</div>
+  </div>
+  <div class="progress"><div id="bar"></div></div>
+  <div class="small">YOUR QUESTION</div>
+  <h2 class="question" id="question"></h2>
+  <div id="options"></div>
+  <button class="primary" id="next" onclick="nextQuestion()" disabled>
+   Next Question →
+  </button>
+ </div>
+</section>
+
+<section id="result" class="hidden">
+ <div class="card result">
+  <div style="font-size:45px">🏆</div>
+  <h2 id="resultTitle">Quiz Completed!</h2>
+  <div class="score" id="score">0/5</div>
+  <p id="message"></p>
+  <div class="stats">
+   <div class="stat"><strong id="correct">0</strong><span class="small">Correct</span></div>
+   <div class="stat"><strong id="accuracy">0%</strong><span class="small">Accuracy</span></div>
+  </div>
+  <button class="primary" onclick="restart()">Try Another Quiz</button>
+  <button class="primary" style="background:#29324e" onclick="showLeaderboard()">View Leaderboard</button>
+  <button class="primary" style="background:#29324e" onclick="goHome()">Home</button>
+ </div>
+</section>
+
+<section id="leaderboard" class="hidden">
+ <div class="card">
+  <h2>🏆 My Leaderboard</h2>
+  <p class="small" style="margin:10px 0 20px">Your best quiz attempts on this device.</p>
+  <div id="scoresList"></div>
+  <button class="primary" onclick="goHome()">Back to Home</button>
+ </div>
+</section>
+
+<footer>© 2026 QuizMaster | College Project</footer>
+</div>
+
+<script>
+const quizzes={
+gk:[
+["Which is the capital of Australia?",["Sydney","Canberra","Melbourne","Perth"],1],
+["Which planet is known as the Red Planet?",["Venus","Jupiter","Mars","Saturn"],2],
+["Who wrote the Indian national anthem?",["Bankim Chandra","Rabindranath Tagore","Sarojini Naidu","Premchand"],1],
+["Which is the largest ocean?",["Atlantic","Indian","Arctic","Pacific"],3],
+["How many continents are there?",["Five","Six","Seven","Eight"],2]
+],
+business:[
+["What does GDP stand for?",["Gross Domestic Product","General Domestic Price","Global Development Plan","Gross Development Process"],0],
+["Which institution issues currency notes in India?",["SBI","RBI","SEBI","NABARD"],1],
+["What is the full form of CEO?",["Chief Executive Officer","Central Economic Officer","Company Executive Owner","Chief Enterprise Operator"],0],
+["Which is a direct tax?",["GST","Customs Duty","Income Tax","Excise Duty"],2],
+["What does SWOT stand for?",["Sales, Work, Output, Target","Strengths, Weaknesses, Opportunities, Threats","System, Work, Operations, Trade","Strategy, Wealth, Organisation, Technology"],1]
+],
+science:[
+["What is the chemical formula of water?",["CO2","H2O","O2","NaCl"],1],
+["Which organ pumps blood?",["Lungs","Brain","Heart","Kidney"],2],
+["What is the speed of light approximately?",["300,000 km/s","30,000 km/s","3,000 km/s","150,000 km/s"],0],
+["Which gas do plants absorb?",["Oxygen","Nitrogen","Carbon dioxide","Hydrogen"],2],
+["What is the centre of an atom called?",["Electron","Nucleus","Proton","Shell"],1]
+],
+computer:[
+["What does CPU stand for?",["Central Processing Unit","Computer Personal Unit","Central Program Utility","Control Processing User"],0],
+["Which language structures web pages?",["Python","HTML","SQL","C++"],1],
+["What does RAM stand for?",["Read Access Memory","Random Access Memory","Run All Memory","Remote Access Module"],1],
+["Which one is an operating system?",["Google","Windows","HTML","Intel"],1],
+["What does URL stand for?",["Uniform Resource Locator","Universal Record Link","User Reference Location","Unified Resource Line"],0]
+]
+};
+
+let category="",index=0,points=0,selected=false;
+let timer=null,remaining=15,answered=0;
+
+const names={
+gk:"General Knowledge",
+business:"Business",
+science:"Science",
+computer:"Computer"
+};
+
+function section(id){
+ ["home","quiz","result","leaderboard"].forEach(x=>
+ document.getElementById(x).classList.toggle("hidden",x!==id));
+}
+
+function startQuiz(type){
+ category=type;index=0;points=0;answered=0;
+ section("quiz");loadQuestion();
+}
+
+function loadQuestion(){
+ clearInterval(timer);
+ selected=false;remaining=15;
+ const q=quizzes[category][index];
+ document.getElementById("categoryName").textContent=names[category];
+ document.getElementById("questionNumber").textContent=
+ "Question "+(index+1)+" of "+quizzes[category].length;
+ document.getElementById("question").textContent=q[0];
+ document.getElementById("time").textContent=remaining;
+ document.getElementById("bar").style.width=
+ (index/quizzes[category].length*100)+"%";
+ document.getElementById("next").disabled=true;
+ document.getElementById("next").textContent=
+ index===quizzes[category].length-1?"Finish Quiz":"Next Question →";
+
+ const box=document.getElementById("options");
+ box.innerHTML="";
+ q[1].forEach((answer,i)=>{
+  const b=document.createElement("button");
+  b.className="option";
+  b.textContent=String.fromCharCode(65+i)+". "+answer;
+  b.onclick=()=>chooseAnswer(i);
+  box.appendChild(b);
+ });
+ timer=setInterval(()=>{
+  remaining--;
+  document.getElementById("time").textContent=remaining;
+  if(remaining<=0){clearInterval(timer);lockAnswer(-1);}
+ },1000);
+}
+
+function chooseAnswer(choice){
+ if(selected)return;
+ lockAnswer(choice);
+}
+
+function lockAnswer(choice){
+ if(selected)return;
+ selected=true;clearInterval(timer);
+ const q=quizzes[category][index];
+ const buttons=document.querySelectorAll(".option");
+ answered++;
+ if(choice===q[2])points++;
+ buttons.forEach((b,i)=>{
+  b.disabled=true;
+  if(i===q[2])b.classList.add("correct");
+  else if(i===choice)b.classList.add("wrong");
+ });
+ document.getElementById("next").disabled=false;
+}
+
+function nextQuestion(){
+ if(!selected)return;
+ index++;
+ if(index<quizzes[category].length)loadQuestion();
+ else finishQuiz();
+}
+
+function finishQuiz(){
+ clearInterval(timer);
+ section("result");
+ const total=quizzes[category].length;
+ const percent=Math.round(points/total*100);
+ document.getElementById("score").textContent=points+"/"+total;
+ document.getElementById("correct").textContent=points;
+ document.getElementById("accuracy").textContent=percent+"%";
+ document.getElementById("resultTitle").textContent=
+ percent>=80?"Excellent Work!":percent>=50?"Good Effort!":"Keep Practising!";
+ document.getElementById("message").textContent=
+ "You completed "+names[category]+". Keep learning and improving!";
+
+ const records=JSON.parse(localStorage.getItem("quizScores")||"[]");
+ records.push({name:names[category],score:points,total,percent,date:new Date().toLocaleDateString()});
+ records.sort((a,b)=>b.percent-a.percent);
+ localStorage.setItem("quizScores",JSON.stringify(records.slice(0,10)));
+}
+
+function showLeaderboard(){
+ clearInterval(timer);
+ section("leaderboard");
+ const records=JSON.parse(localStorage.getItem("quizScores")||"[]");
+ const box=document.getElementById("scoresList");
+ if(!records.length){
+  box.textContent="No attempts yet. Take your first quiz!";
+  return;
+ }
+ box.innerHTML="";
+ records.forEach((r,i)=>{
+  const div=document.createElement("div");
+  div.className="option";
+  div.style.cursor="default";
+  div.textContent=(i+1)+". "+r.name+" — "+r.score+"/"+r.total+" ("+r.percent+"%) · "+r.date;
+  box.appendChild(div);
+ });
+}
+
+function restart(){startQuiz(category)}
+function goHome(){clearInterval(timer);section("home")}
+</script>
+</body>
+</html>
